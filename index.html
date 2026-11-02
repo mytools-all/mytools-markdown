@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>超级 Markdown</title>
+    <link rel="stylesheet" href="tool.css" />
+    <link rel="stylesheet" href="md-editor.css" />
+    <link rel="stylesheet" href="cropper.css" />
+    <link rel="stylesheet" href="highlight.css" />
+    <style>
+      .notebook {
+        display: grid;
+        grid-template-columns: 208px minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
+      }
+      .notes {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: var(--surface);
+      }
+      .notes-heading {
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .notes-heading strong {
+        flex: 1;
+      }
+      .notes input {
+        margin: 0 10px 10px;
+        width: calc(100% - 20px);
+        background: var(--bg);
+      }
+      #note-list {
+        overflow: auto;
+        flex: 1;
+      }
+      .note {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .note.active {
+        background: var(--soft);
+        color: var(--accent);
+      }
+      .note b {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .note small {
+        font-size: 10px;
+      }
+      .note-actions {
+        padding: 8px;
+        display: flex;
+        gap: 5px;
+        border-top: 1px solid var(--border);
+      }
+      .note-actions button {
+        flex: 1;
+        padding: 5px;
+      }
+      .document {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+      }
+      .document-head {
+        display: flex;
+        align-items: center;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border);
+        gap: 8px;
+      }
+      .document-head input {
+        border: 0;
+        background: transparent;
+        font-size: 17px;
+        font-weight: 600;
+        flex: 1;
+        min-width: 0;
+        padding: 5px;
+      }
+      .editor-actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--border);
+        padding: 6px 10px;
+      }
+      .editor-actions button {
+        padding: 4px 8px;
+        border: 0;
+        background: transparent;
+      }
+      .editor-actions button:hover {
+        background: var(--soft);
+      }
+      .panes {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
+      }
+      .panes > * {
+        min-width: 0;
+        min-height: 0;
+      }
+      .panes.reading {
+        grid-template-columns: 1fr;
+      }
+      .panes.reading #source {
+        display: none;
+      }
+      .panes.source-only {
+        grid-template-columns: 1fr;
+      }
+      .panes.source-only #preview {
+        display: none;
+      }
+      #source {
+        width: 100%;
+        height: 100%;
+        padding: 18px;
+        resize: none;
+        outline: none;
+        border: 0;
+        border-right: 1px solid var(--border);
+        border-radius: 0;
+        background: var(--bg);
+        font:
+          14px/1.8 Consolas,
+          "Microsoft YaHei",
+          monospace;
+        overflow: auto;
+      }
+      #preview {
+        overflow: auto;
+        padding: 18px;
+        line-height: 1.85;
+        overflow-wrap: anywhere;
+      }
+      #preview h1 {
+        font-size: 26px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 7px;
+      }
+      #preview h2 {
+        font-size: 21px;
+      }
+      #preview pre {
+        padding: 12px;
+        background: var(--surface);
+        border-radius: 5px;
+        overflow: auto;
+        white-space: pre;
+      }
+      #preview code {
+        font-family: Consolas, monospace;
+        background: var(--surface);
+      }
+      #preview blockquote {
+        margin: 10px 0;
+        padding: 4px 12px;
+        border-left: 3px solid var(--accent);
+        color: var(--muted);
+      }
+      #preview img {
+        max-width: 100%;
+        height: auto;
+      }
+      #outline {
+        position: absolute;
+        right: 12px;
+        top: 95px;
+        width: 200px;
+        max-height: 60%;
+        overflow: auto;
+        padding: 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        box-shadow: 0 5px 24px #0002;
+        z-index: 2;
+      }
+      #outline button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        font-size: 12px;
+      }
+      .document {
+        position: relative;
+      }
+      .save-state {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      #dialog {
+        position: fixed;
+        inset: 0;
+        background: #0006;
+        display: grid;
+        place-items: center;
+        z-index: 5;
+      }
+      .dialog-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 22px;
+        max-width: 85%;
+        width: 380px;
+      }
+      .dialog-box .row {
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+      #filename {
+        font-size: 11px;
+        color: var(--muted);
+        padding: 3px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      @media (max-width: 650px) {
+        .notebook {
+          grid-template-columns: 145px 1fr;
+        }
+        .notes-heading {
+          padding: 10px;
+          font-size: 11px;
+        }
+        .notes-heading button {
+          padding: 3px;
+        }
+        .document-head input {
+          font-size: 14px;
+        }
+        .document-head button {
+          padding: 4px 6px;
+        }
+        .panes {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+      }
+
+      #formats,
+      #panes {
+        display: none;
+      }
+      #editor-root {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .md-editor {
+        height: 100%;
+        border: 0;
+      }
+      .document-head {
+        flex-wrap: wrap;
+      }
+      #editor-root .md-editor {
+        --md-bk-color: var(--bg);
+        --md-color: var(--fg);
+        --md-border-color: var(--border);
+      }
+      #editor-root .md-editor-toolbar-wrapper {
+        background: var(--surface);
+      }
+      #note-list details {
+        padding: 0;
+        border: 0;
+      }
+      #note-list summary {
+        padding: 8px 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      #note-list .note {
+        padding-left: 22px;
+      }
+      #folder {
+        max-width: 100px;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="notebook">
+        <aside class="notes">
+          <div class="notes-heading">
+            <strong>超级 Markdown</strong
+            ><button id="new" title="新建笔记">＋</button
+            ><button id="new-folder" title="新建分类">▱</button
+            ><button id="theme">◐</button>
+          </div>
+          <input
+            id="note-search"
+            placeholder="搜索笔记"
+            aria-label="搜索笔记"
+          />
+          <div id="note-list"></div>
+          <div class="note-actions">
+            <button id="open">导入 MD</button><button id="backup">备份</button
+            ><button id="restore">恢复</button>
+          </div>
+          <input
+            id="file"
+            type="file"
+            accept=".md,.markdown,.txt"
+            multiple
+            hidden
+          /><input id="backup-file" type="file" accept=".json" hidden />
+        </aside>
+        <section class="document">
+          <div class="document-head">
+            <input
+              id="title"
+              value="未命名笔记"
+              placeholder="输入文章标题"
+              aria-label="文章标题"
+            /><select id="folder" aria-label="文章分类"></select
+            ><span id="save-state" class="save-state"></span
+            ><button id="save">保存</button
+            ><button id="delete" title="删除当前笔记">删除</button>
+          </div>
+          <div class="editor-actions" id="formats">
+            <button data-block="# ">H1</button
+            ><button data-block="## ">H2</button
+            ><button data-before="**" data-after="**" title="Ctrl+B">
+              <b>B</b></button
+            ><button data-before="*" data-after="*" title="Ctrl+I">
+              <i>I</i></button
+            ><button data-before="~~" data-after="~~">删除线</button
+            ><button data-block="- ">列表</button
+            ><button data-block="1. ">有序列表</button
+            ><button data-block="> ">引用</button
+            ><button id="code">代码块</button><button id="link">链接</button
+            ><button id="image">图片</button><button id="table">表格</button
+            ><span class="spacer"></span
+            ><button id="edit-mode" class="active">双栏</button
+            ><button id="source-mode">源码</button
+            ><button id="preview-mode">预览</button
+            ><button id="outline-toggle">目录</button
+            ><button id="export">导出</button><button id="html">HTML</button
+            ><button id="copy">复制</button>
+          </div>
+          <div id="filename" class="hidden"></div>
+          <div id="editor-root"></div>
+          <div id="panes" class="panes">
+            <textarea
+              id="source"
+              placeholder="输入文章内容…"
+              spellcheck="false"
+              aria-label="Markdown 编辑区"
+            ></textarea>
+            <article id="preview"></article>
+          </div>
+          <nav id="outline" class="hidden"></nav>
+        </section>
+      </div>
+      <footer id="status" class="status" role="status"></footer>
+      <div id="dialog" class="hidden">
+        <section class="dialog-box">
+          <strong id="dialog-title"></strong>
+          <p id="dialog-message"></p>
+          <input id="dialog-input" class="hidden" placeholder="分类名称" />
+          <div class="row">
+            <button id="dialog-cancel">取消</button
+            ><button id="dialog-confirm" class="primary">确定</button>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="highlight.js"></script>
+    <script src="screenfull.js"></script>
+    <script src="cropper.js"></script>
+    <script src="md-icons.js"></script>
+    <script type="module" src="app.mjs"></script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "@mytools-all/mytools-markdown",
+  "version": "0.1.0",
+  "description": "Markdown 编辑器：实时预览、自动保存草稿。",
+  "type": "module",
+  "main": "index.html",
+  "license": "MIT",
+  "author": "MyTools Contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mytools-all/mytools-markdown.git"
+  },
+  "homepage": "https://github.com/mytools-all/mytools-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/mytools-all/mytools-markdown/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "plugin.json",
+    "*.html",
+    "*.css",
+    "*.svg",
+    "*.png",
+    "vendor/",
+    "LICENSE",
+    "THIRD_PARTY.md",
+    "README.md",
+    "app.mjs",
+    "common.mjs",
+    "editor-adapter.mjs",
+    "marked.mjs",
+    "md-editor.mjs",
+    "purify.mjs",
+    "utils.mjs",
+    "vue.mjs",
+    "*.js",
+    "*.LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test"
+  }
+}

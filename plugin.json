@@ -1,0 +1,26 @@
+{
+  "name": "mytools-markdown",
+  "description": "Markdown 编辑器：实时预览、自动保存草稿。",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "main": "index.html",
+  "capabilities": [
+    "storage.get",
+    "storage.set",
+    "clipboard.write",
+    "shell.open",
+    "fs.exporttext"
+  ],
+  "features": [
+    {
+      "code": "editor",
+      "explain": "打开Markdown 编辑器",
+      "cmds": [
+        "Markdown",
+        "md",
+        "编辑器"
+      ]
+    }
+  ],
+  "pluginName": "Markdown 编辑器"
+}
