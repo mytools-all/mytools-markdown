@@ -32,7 +32,7 @@ const editor = createEditor($("#editor-root"), {
   onSave: () => void persist(),
   onError: (message) => status(message, true),
 });
-for (const id of ["export", "html", "copy", "preview-mode", "edit-mode"])
+for (const id of ["export", "html", "copy", "preview-mode", "edit-mode", "source-mode"])
   $(".document-head").append($("#" + id));
 
 const newNote = (title = "未命名笔记", text = "") => ({
@@ -293,11 +293,11 @@ $("#image").onclick = () =>
 $("#table").onclick = () =>
   insert("\n| 标题 | 标题 |\n| --- | --- |\n| 内容 | 内容 |\n");
 function mode(name) {
-  editor.setReadonly(name === "preview");
-  $("#panes").classList.toggle("reading", name === "preview");
-  $("#panes").classList.toggle("source-only", name === "source");
+  editor.setMode(name);
   for (const key of ["edit", "source", "preview"])
-    $("#" + key + "-mode").classList.toggle("active", key === name);
+    { const button = $("#" + key + "-mode");
+      button.classList.toggle("active", key === name);
+      button.setAttribute("aria-pressed", String(key === name)); }
 }
 $("#edit-mode").onclick = () => mode("edit");
 $("#preview-mode").onclick = () => mode("preview");

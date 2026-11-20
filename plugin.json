@@ -1,7 +1,7 @@
 {
   "name": "mytools-markdown",
   "description": "Markdown 编辑器：实时预览、自动保存草稿。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 1,
   "main": "index.html",
   "capabilities": [

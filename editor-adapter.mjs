@@ -6,7 +6,8 @@ export function createEditor(target, options) {
     theme = ref(
       document.documentElement.dataset.theme === "light" ? "light" : "dark",
     ),
-    readonly = ref(false);
+    mode = ref("edit"),
+    modeRevision = ref(0);
   MdEditor.config({
     editorExtensions: {
       highlight: { instance: window.hljs },
@@ -18,13 +19,15 @@ export function createEditor(target, options) {
   const app = createApp({
     render: () =>
       h(MdEditor, {
+        key: modeRevision.value,
         modelValue: content.value,
         "onUpdate:modelValue": (v) => {
           content.value = v;
           options.onChange(v);
         },
         theme: theme.value,
-        previewOnly: readonly.value,
+        previewOnly: mode.value === "preview",
+        preview: mode.value !== "source",
         editorId: "markdown-editor",
         language: "zh-CN",
         noIconfont: true,
@@ -92,10 +95,11 @@ export function createEditor(target, options) {
   });
   app.config.errorHandler = (e) => options.onError(e.message || String(e));
   app.mount(target);
-  new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
     theme.value =
       document.documentElement.dataset.theme === "light" ? "light" : "dark";
-  }).observe(document.documentElement, {
+  });
+  observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["data-theme"],
   });
@@ -103,9 +107,11 @@ export function createEditor(target, options) {
     setValue: (v) => {
       content.value = v;
     },
-    setReadonly: (v) => {
-      readonly.value = v;
+    setMode: (value) => {
+      if (!["edit", "source", "preview"].includes(value)) throw Error("未知编辑模式");
+      mode.value = value;
+      modeRevision.value++;
     },
-    destroy: () => app.unmount(),
+    destroy: () => { observer.disconnect(); app.unmount(); },
   };
 }
