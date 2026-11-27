@@ -1,6 +1,6 @@
 {
   "name": "@mytools-all/mytools-markdown",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Markdown 编辑器：实时预览、自动保存草稿。",
   "type": "module",
   "main": "index.html",
@@ -44,5 +44,8 @@
   },
   "devDependencies": {
     "happy-dom": "21.0.4"
+  },
+  "engines": {
+    "mytools": ">=0.2.0 <0.3.0"
   }
 }
